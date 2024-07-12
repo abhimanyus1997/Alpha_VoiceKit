@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Web Speech API Audio Assistant</title>
+    <title>Alphakit audio Assistant</title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .hidden { display: none; }
@@ -65,6 +65,8 @@
     </div>
 
     <script>
+        let WAKEWORD = "hello";
+
         // Test browser support
         window.SpeechRecognition = window.SpeechRecognition ||
                                    window.webkitSpeechRecognition ||
@@ -92,11 +94,11 @@
                 recognizer.onresult = function(event) {
                     for (var i = event.resultIndex; i < event.results.length; i++) {
                         var transcript = event.results[i][0].transcript.toLowerCase().trim();
-                        if (transcript.includes("hey alpha")) {
+                        if (transcript.includes(WAKEWORD)) {
                             isListeningForKeyword = false;
                             recognizer.stop();
                             recognizer.lang = languageSelect.value;
-                            log.innerHTML = 'Keyword detected. Starting transcription in ' + languageSelect.options[languageSelect.selectedIndex].text + '...' + '<br />' + log.innerHTML;
+                            log.innerHTML = 'Wakeword detected. Starting transcription in ' + languageSelect.options[languageSelect.selectedIndex].text + '...' + '<br />' + log.innerHTML;
                             startTranscription();
                         }
                     }
@@ -108,20 +110,25 @@
                 };
                 recognizer.start();
                 isRecognizerRunning = true;
-                log.innerHTML = 'Listening for "Hey Alpha"...' + '<br />' + log.innerHTML;
+                log.innerHTML = 'Listening for "'+WAKEWORD+'"...' + '<br />' + log.innerHTML;
             }
 
             // Function to start transcribing after keyword is detected
             function startTranscription() {
                 recognizer.onresult = function(event) {
                     transcription.textContent = '';
+                    user_voice_input = '';
                     for (var i = event.resultIndex; i < event.results.length; i++) {
                         if (event.results[i].isFinal) {
                             transcription.textContent = event.results[i][0].transcript + ' (Confidence: ' + event.results[i][0].confidence + ')';
+                            user_voice_input = event.results[i][0].transcript;
+                            
                         } else {
                             transcription.textContent += event.results[i][0].transcript;
+                            user_voice_input = event.results[i][0].transcript;
                         }
                     }
+                   console.log("Found:",user_voice_input);
                 };
 
                 recognizer.onend = function() {
